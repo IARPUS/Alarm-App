@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 //connect using localhost/aDatabaste in order to connect to a local mongodb database
 //mongoose.connect("mongodb://localhost/alarmdb");
 
@@ -47,5 +47,4 @@ const alarmSchema = new mongoose.Schema({
   }
 })
 
-const Alarm = mongoose.model("Alarm", alarmSchema);
-export { Alarm };
+module.exports = mongoose.model('Alarm', alarmSchema);

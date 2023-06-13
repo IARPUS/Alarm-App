@@ -1,5 +1,5 @@
-import express from 'express';
-import { Alarm } from '../models/alarm.js';
+const express = require('express');
+const Alarm = require('../models/alarm.js');
 const router = express.Router();
 
 //essentially creating the API here
@@ -16,8 +16,12 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: err.message })
   }
 });
+//route for getting specific alarm by id
+router.get('/:id', getAlarm, async (req, res) => {
+  res.json(res.alarm);
+});
 //route for updating one
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', getAlarm, async (req, res) => {
   //bunch of if statements to check what data is changed, and if it is changed replace the old with the new data
   if (req.body.name != null) {
     res.alarm.name = req.body.name;
@@ -45,12 +49,22 @@ router.patch('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   //create new Alarm object
   console.log(req.body);
-  const alarm = new Alarm({
-    name: req.body.name,
-    time: req.body.time,
-    abbreviation: req.body.abbreviation,
-    repeatDays: req.body.repeatDays
-  });
+  const alarm = new Alarm(
+    {
+      name: req.body.name,
+      time: req.body.time,
+      abbreviation: req.body.abbreviation,
+      repeatDays: {
+        Sunday: req.body.repeatDays.Sunday,
+        Monday: req.body.repeatDays.Monday,
+        Tuesday: req.body.repeatDays.Tuesday,
+        Wednesday: req.body.repeatDays.Wednesday,
+        Thursday: req.body.repeatDays.Thursday,
+        Friday: req.body.repeatDays.Friday,
+        Saturday: req.body.repeatDays.Saturday
+      }
+    }
+  );
   try {
     //wait until we save the alarm to database
     const newAlarm = await alarm.save();
@@ -62,11 +76,20 @@ router.post('/', async (req, res) => {
   }
 });
 //route for deleting one
+router.delete('/:id', getAlarm, async (req, res) => {
+  try {
+    await res.alarm.deleteOne();
+    res.json({ message: "Removed alarm" })
+  }
+  catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+});
 //middleware for 
 async function getAlarm(req, res, next) {
   let alarm
   try {
-    alarm = await Alarm.findById(req.params.id);
+    alarm = await Alarm.findById(req.params.id)
     if (alarm == null) {
       return res.status(404).json({ message: 'Cannot find alarms' });
     }
@@ -79,5 +102,4 @@ async function getAlarm(req, res, next) {
   //call the next middleware function in the middleware stack
   next();
 }
-//module.exports = router;
-export { router };
+module.exports = router;

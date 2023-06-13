@@ -1,6 +1,6 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import { router } from './database/routes/alarms.js';
+const express = require('express');
+const mongoose = require('mongoose');
+const router = require('./database/routes/alarms.js');
 const DATABASE_URL = "mongodb://localhost/alarms";
 const app = express();
 app.use(express.json());

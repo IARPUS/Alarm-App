@@ -12,11 +12,17 @@ function App() {
     const fetchData = async () => {
       await fetch(DATABASE_URL,
         {
-
+          method: "GET"
         }).then(res => {
           if (res.ok) {
             console.log("Successful in fetching data");
-            return res.json
+            console.log(res);
+            if (res.length === 0) {
+              return [];
+            }
+            else {
+              return res.json;
+            }
           } else {
             console.log("Error in fetching data");
           }
