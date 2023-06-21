@@ -28,7 +28,7 @@ function App() {
       await fetch(DATABASE_URL)
         .then(res => {
           if (res.ok) {
-            console.log("Successful status");
+            console.log("Successful connected to fetch data");
             const data = res.json();
             return data;
           }
@@ -58,7 +58,7 @@ function App() {
 
   //delete alarm card from data base and update alarm list
   const deleteAlarmCard = async (id) => {
-    console.log(id);
+    console.log("Deleting ", id);
     try {
       await fetch(DATABASE_URL + "/" + id,
         {

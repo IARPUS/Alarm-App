@@ -33,6 +33,6 @@ app.use(express.json())
   res.send('We are on home');
 });*/
 app.use(express.json());
-app.use('/alarms', router)
+app.use('/alarms', router);
 app.listen(3000, () => console.log('Server Started'));
 

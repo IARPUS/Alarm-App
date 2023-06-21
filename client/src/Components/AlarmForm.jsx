@@ -52,8 +52,8 @@ const AlarmForm = ({ list, setAlarmList, setAlarmFormIsVisible }) => {
           },
           body: JSON.stringify(data)
         });
-        console.log("Successful in connecting");
         const resData = await res.json();
+        console.log("Succesfully sent data to database");
         return resData._id;
       }
       catch (error) {
@@ -65,7 +65,6 @@ const AlarmForm = ({ list, setAlarmList, setAlarmFormIsVisible }) => {
         console.log("Data posted", JSON.stringify(data));
         const dataWithID = data;
         dataWithID._id = await updateDB();
-        console.log(dataWithID._id);
         const newList = [...list, dataWithID];
         setAlarmList(newList);
         setAlarmFormIsVisible(false);
