@@ -5,18 +5,10 @@ Content-Type: application/json
   "name": "test",
   "time": "12:30",
   "abbreviation": "PM",
-  "repeatDays": {
-    "Sunday": 1,
-    "Monday": 1,
-    "Tuesday": 1,
-    "Wednesday": 1,
-    "Thursday": 1,
-    "Friday": 1,
-    "Saturday": 1
-  }
+  "repeatDays": ["Sunday", "Monday"]
 }
 ###
-GET http://localhost:3000/alarms/6488af0ea9d8a3b09fb13fa7
+GET http://localhost:3000/alarms
 
 ### 
-DELETE http://localhost:3000/alarms/6488af0ea9d8a3b09fb13fa7
+DELETE http://localhost:3000/alarms/648f87fc9a868fb4bd4e7a58

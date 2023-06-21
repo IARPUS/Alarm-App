@@ -1,59 +1,80 @@
-import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import '../Styles/AlarmForm.css'
 
-const DATABASE_URL = "/alarms";
+const DATABASE_URL = "http://localhost:3000/alarms";
 
-const AlarmForm = ({ list, setList }) => {
-  const defaultData = {
-    name: "",
-    time: "",
-    abbreviation: "",
-    repeatDays: {
-      Sunday: "0",
-      Monday: "0",
-      Tuesday: "0",
-      Wednesday: "0",
-      Thursday: "0",
-      Friday: "0",
-      Saturday: "0"
-    }
-  };
-  const [data, setData] = useState(defaultData);
-  let hourOptions = [];
-  let minutesOptions = [];
-  let daysCheckBoxes = [];
-  const days = new Map();
-  days.set('Sunday', 0);
-  days.set('Monday', 0);
-  days.set('Tuesday', 0);
-  days.set('Wednesday', 0);
-  days.set('Thursday', 0);
-  days.set('Friday', 0);
-  days.set('Saturday', 0);
-  const abbreviationOptions = [<option value="AM" key="AM">AM</option>, <option value="PM" key="PM">PM</option>];
+let hourOptions = [];
+let minutesOptions = [];
+let daysCheckBoxes = [];
+let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+//create multiple HTML elements 
+const abbreviationOptions = [<option value="AM" key="AM">AM</option>, <option value="PM" key="PM">PM</option>];
+const createHTMLElements = () => {
   for (let i = 1; i <= 12; i++) {
     hourOptions.push(<option className="Hour-Options" value={i} key={i}> {i} </option>)
   }
   for (let i = 0; i <= 59; i++) {
-    minutesOptions.push(<option className="Minute-Options" value={i} key={i}> {i} </option>)
-  }
-  for (const key of days.keys()) {
-    daysCheckBoxes.push(<input type="checkbox" className="Day-CheckBoxes" id={key} value={1}></input>);
-    daysCheckBoxes.push(<label className="Day-CheckBoxes-Labels" htmlFor={key}>{key}</label>);
-  }
-  //update data to database
-  const updateDB = async () => {
-    try {
-      await fetch(DATABASE_URL, {
-        method: "POST",
-        body: JSON.stringify(data)
-      });
+    if (i < 10) {
+      minutesOptions.push(<option className="Minute-Options" value={"0" + i} key={i}> {"0" + i} </option>)
     }
-    catch (error) {
-      console.log("Error saving data to database:", error);
+    else {
+      minutesOptions.push(<option className="Minute-Options" value={i} key={i}> {i} </option>)
     }
+  }
+  for (let day of days) {
+    daysCheckBoxes.push(<input key={day + 1} type="checkbox" className="Day-CheckBoxes" id={day} value={1}></input>);
+    daysCheckBoxes.push(<label key={day + 2} className="Day-CheckBoxes-Labels" htmlFor={day}>{day}</label>);
+  }
+};
+createHTMLElements();
+
+const AlarmForm = ({ list, setAlarmList, setAlarmFormIsVisible }) => {
+  //the data format that will be stored
+  const defaultData = {
+    name: "",
+    time: "",
+    abbreviation: "",
+    repeatDays: [],
+    _id: ""
   };
+  const [data, setData] = useState(defaultData);
+  //update data to database
+
+  useEffect(() => {
+    const updateDB = async () => {
+      try {
+        const res = await fetch(DATABASE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+        console.log("Successful in connecting");
+        const resData = await res.json();
+        return resData._id;
+      }
+      catch (error) {
+        console.log("Error saving data to database:", error);
+      }
+    };
+    const updateList = async () => {
+      if (JSON.stringify(data) !== JSON.stringify(defaultData)) {
+        console.log("Data posted", JSON.stringify(data));
+        const dataWithID = data;
+        dataWithID._id = await updateDB();
+        console.log(dataWithID._id);
+        const newList = [...list, dataWithID];
+        setAlarmList(newList);
+        setAlarmFormIsVisible(false);
+      }
+    }
+    updateList();
+    //reset form and state 
+  }, [data])
+
 
   //submitting data to database 
   const handleSubmit = (e) => {
@@ -61,10 +82,11 @@ const AlarmForm = ({ list, setList }) => {
     let newName = e.target.elements["label"].value;
     let newTime = e.target.elements["Hour"].value + ":" + e.target.elements["Minutes"].value;
     let newAbbreviation = e.target.elements["Abbreviation"].value;
-    let newRepeatDays = e.target.getElementsByClassName("Day-CheckBoxes");
-    for (const checkbox of newRepeatDays) {
+    let newRepeatDays = [];
+    let daysHTML = e.target.getElementsByClassName("Day-CheckBoxes");
+    for (let checkbox of daysHTML) {
       if (checkbox.checked) {
-        days.set(checkbox.id, 1);
+        newRepeatDays.push(checkbox.id);
       }
     }
     //update state
@@ -72,21 +94,18 @@ const AlarmForm = ({ list, setList }) => {
       name: newName,
       time: newTime,
       abbreviation: newAbbreviation,
-      repeatDays: days
-    })
-    //update database
-    updateDB();
-    const newList = [...list, data];
-    setList(newList);
-    //reset form and state 
-    e.target.reset();
-    setData(defaultData);
+      repeatDays: newRepeatDays
+    });
   }
-  //update database everytime data is changed
+  //function to reset data without trigger useEffect
+  const resetData = () => {
+    setData(defaultData);
+  };
+
   return (
     <>
-      <button id="Cancel-Button">Cancel</button>
-      <form onSubmit={handleSubmit}>
+      <button id="Cancel-Button" onClick={() => setAlarmFormIsVisible(false)}>Cancel</button>
+      <form onSubmit={handleSubmit} id="Alarm-Form">
         <h1 id="Form-Title">Add Alarm</h1>
         <div>
           <label htmlFor="Hour">
@@ -117,6 +136,7 @@ const AlarmForm = ({ list, setList }) => {
 };
 AlarmForm.propTypes = {
   list: PropTypes.arrayOf(PropTypes.object),
-  setList: PropTypes.func
+  setAlarmList: PropTypes.func,
+  setAlarmFormIsVisible: PropTypes.func
 };
 export default AlarmForm;

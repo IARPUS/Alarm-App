@@ -16,34 +16,8 @@ const alarmSchema = new mongoose.Schema({
     required: true
   },
   repeatDays: {
-    Sunday: {
-      type: Number,
-      required: true
-    },
-    Monday: {
-      type: Number,
-      required: true
-    },
-    Tuesday: {
-      type: Number,
-      required: true
-    },
-    Wednesday: {
-      type: Number,
-      required: true
-    },
-    Thursday: {
-      type: Number,
-      required: true
-    },
-    Friday: {
-      type: Number,
-      required: true
-    },
-    Saturday: {
-      type: Number,
-      required: true
-    }
+    type: Array,
+    required: true
   }
 })
 

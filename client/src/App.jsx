@@ -1,45 +1,99 @@
-import { useState, useEffect } from 'react'
-import { React } from 'react'
-import './App.css'
+import { useState, useEffect, useCallback } from 'react'
+import './Styles/App.css'
 import AlarmCard from './Components/AlarmCard'
 import AlarmForm from './Components/AlarmForm'
 
-const DATABASE_URL = "/alarms";
+const DATABASE_URL = "http://localhost:3000/alarms";
 
 function App() {
   const [alarmList, setAlarmList] = useState([]);
+  const [alarmCards, setAlarmCards] = useState([]);
+  //state used to toggle between the alarm form and cards
+  const [alarmFormIsVisible, setAlarmFormIsVisible] = useState(false);
+  //state used to toggle delete and edit buttons
+  const [isEditButtonsVisible, setIsEditButtonsVisible] = useState(false);
+
+  //function to create the actual alarmcards from data
+  const createAlarmCardsHTML = (data) => {
+    let alarmCardsHTML = [];
+    for (let alarmData of data) {
+      alarmCardsHTML.push(<AlarmCard isEditButtonsVisible={isEditButtonsVisible} key={alarmData._id} id={alarmData._id} deleteAlarmCard={deleteAlarmCard} name={alarmData.name} time={alarmData.time} abbreviation={alarmData.abbreviation} repeatDays={alarmData.repeatDays} ></AlarmCard>);
+    }
+    return alarmCardsHTML;
+  };
+
+  //grab set the initial alarm list on first render
   useEffect(() => {
-    const fetchData = async () => {
-      await fetch(DATABASE_URL,
-        {
-          method: "GET"
-        }).then(res => {
+    const setInitialData = async () => {
+      await fetch(DATABASE_URL)
+        .then(res => {
           if (res.ok) {
-            console.log("Successful in fetching data");
-            console.log(res);
-            if (res.length === 0) {
-              return [];
-            }
-            else {
-              return res.json;
-            }
-          } else {
-            console.log("Error in fetching data");
+            console.log("Successful status");
+            const data = res.json();
+            return data;
+          }
+          else {
+            console.log("Failed status");
+            return null;
           }
         })
         .then(data => {
-          setAlarmList(data);
           console.log(data);
+          setAlarmList(data);
         })
-        .catch(() => {
-          console.log("Error in setting data")
-        })
-    }
-    fetchData();
+        .catch(err => console.log("Error in fetching data", err))
+    };
+    setInitialData();
   }, []);
+
+  //update our alarm cards whenever the alarm list changes
+  const updateAlarmCards = useCallback(() => {
+    const cards = createAlarmCardsHTML(alarmList);
+    setAlarmCards(cards);
+  }, [alarmList, isEditButtonsVisible]);
+
+  useEffect(() => {
+    updateAlarmCards();
+  }, [updateAlarmCards]);
+
+  //delete alarm card from data base and update alarm list
+  const deleteAlarmCard = async (id) => {
+    console.log(id);
+    try {
+      await fetch(DATABASE_URL + "/" + id,
+        {
+          method: "DELETE"
+        });
+      setAlarmList(alarmList.filter((alarm) => alarm._id != id));
+      console.log("Succesful in connecting");
+    }
+    catch (error) {
+      console.log("Error in fetching", error);
+    }
+  }
+  //update visibility of alarm cards based on whether or not alarm form is visible
   return (
     <>
-      <AlarmForm list={alarmList}></AlarmForm>
+      {alarmList.length == 0 && !alarmFormIsVisible ?
+        (
+          <>
+            <button id="Add-Alarm-Button" onClick={() => { setAlarmFormIsVisible(!alarmFormIsVisible); setIsEditButtonsVisible(false) }}>+</button >
+            <div>No Alarms Added</div>
+          </>
+        )
+        :
+        alarmFormIsVisible ?
+          (
+            <AlarmForm list={alarmList} setAlarmFormIsVisible={setAlarmFormIsVisible} setAlarmList={setAlarmList}></AlarmForm>
+          )
+          :
+          (
+            <>
+              <button id="Edit-Button" onClick={() => { setIsEditButtonsVisible(!isEditButtonsVisible); }}>Edit</button>
+              <button id="Add-Alarm-Button" onClick={() => { setAlarmFormIsVisible(!alarmFormIsVisible); setIsEditButtonsVisible(false) }}>+</button >
+              < div id="Alarm-Cards-Container">{alarmCards}</div >
+            </>
+          )}
     </>
   );
 }

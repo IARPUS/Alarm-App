@@ -5,9 +5,11 @@ const router = express.Router();
 //essentially creating the API here
 //route for getting all alarms
 //we use async since we want to wait for the .find() but dont want to stall other code
+
 router.get('/', async (req, res) => {
   try {
     //grab all alarms from database
+    console.log("here")
     const alarms = await Alarm.find();
     //parse json
     res.json(alarms);
@@ -54,15 +56,7 @@ router.post('/', async (req, res) => {
       name: req.body.name,
       time: req.body.time,
       abbreviation: req.body.abbreviation,
-      repeatDays: {
-        Sunday: req.body.repeatDays.Sunday,
-        Monday: req.body.repeatDays.Monday,
-        Tuesday: req.body.repeatDays.Tuesday,
-        Wednesday: req.body.repeatDays.Wednesday,
-        Thursday: req.body.repeatDays.Thursday,
-        Friday: req.body.repeatDays.Friday,
-        Saturday: req.body.repeatDays.Saturday
-      }
+      repeatDays: req.body.repeatDays
     }
   );
   try {
