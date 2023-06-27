@@ -13,19 +13,18 @@ let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "S
 const abbreviationOptions = [<option value="AM" key="AM">AM</option>, <option value="PM" key="PM">PM</option>];
 const createHTMLElements = () => {
   for (let i = 1; i <= 12; i++) {
-    hourOptions.push(<option className="Hour-Options" value={i} key={i}> {i} </option>)
+    hourOptions.push(<option value={i} key={i}> {i} </option>)
   }
   for (let i = 0; i <= 59; i++) {
     if (i < 10) {
-      minutesOptions.push(<option className="Minute-Options" value={"0" + i} key={i}> {"0" + i} </option>)
+      minutesOptions.push(<option value={"0" + i} key={i}> {"0" + i} </option>)
     }
     else {
-      minutesOptions.push(<option className="Minute-Options" value={i} key={i}> {i} </option>)
+      minutesOptions.push(<option value={i} key={i}> {i} </option>)
     }
   }
   for (let day of days) {
-    daysCheckBoxes.push(<input key={day + 1} type="checkbox" className="Day-CheckBoxes" id={day} value={1}></input>);
-    daysCheckBoxes.push(<label key={day + 2} className="Day-CheckBoxes-Labels" htmlFor={day}>{day}</label>);
+    daysCheckBoxes.push(<label key={day + 2} htmlFor={day}> {day}<input key={day + 1} type="checkbox" id={day} value={1} ></input></label>);
   }
 };
 createHTMLElements();
@@ -103,34 +102,39 @@ const AlarmForm = ({ list, setAlarmList, setAlarmFormIsVisible }) => {
 
   return (
     <>
-      <button id="Cancel-Button" onClick={() => setAlarmFormIsVisible(false)}>Cancel</button>
-      <form onSubmit={handleSubmit} id="Alarm-Form">
-        <h1 id="Form-Title">Add Alarm</h1>
-        <div>
-          <label htmlFor="Hour">
-            <select name="Hour" id="Hour">
-              {hourOptions}
-            </select>
+      <div id="Form-Page-Container">
+        <button id="Cancel-Button" onClick={() => setAlarmFormIsVisible(false)}>Cancel</button>
+        <form onSubmit={handleSubmit} className="Vertical-Items" id="Alarm-Form">
+          <h1 id="Form-Title" className="Vertical-Items">Add Alarm</h1>
+          <div className="Horizontal-Items">
+            <label htmlFor="Hour">
+              <select name="Hour" id="Hour" className="Option-Boxes">
+                {hourOptions}
+              </select>
+            </label>
+            <label htmlFor="Minutes">
+              <select name="Minutes" id="Minutes" className="Option-Boxes">
+                {minutesOptions}
+              </select>
+            </label>
+            <label htmlFor="Abbreviation">
+              <select name="Abbreviation" id="Abbreviation" className="Option-Boxes">
+                {abbreviationOptions}
+              </select>
+            </label>
+          </div>
+          <div className="Horizontal-Items Label-Font">
+            {daysCheckBoxes}
+          </div>
+          <label htmlFor="Alarm-Label" className="Label-Font">
+            Label
+            <input id="Alarm-Label" type="text" name="label" required></input>
           </label>
-          <label htmlFor="Minutes">
-            <select name="Minutes" id="Minutes">
-              {minutesOptions}
-            </select>
-          </label>
-          <label htmlFor="Abbreviation">
-            <select name="Abbreviation" id="Abbreviation">
-              {abbreviationOptions}
-            </select>
-          </label>
-        </div>
-        {daysCheckBoxes}
-        <label htmlFor="Alarm-Label">
-          Label
-          <input id="Alarm-Label" type="text" name="label" required></input>
-        </label>
-        <button type="submit" id="Submit-Button"> Save </button>
-      </form >
+          <button type="submit" id="Submit-Button"> Save </button>
+        </form >
+      </div>
     </>
+
   )
 };
 AlarmForm.propTypes = {

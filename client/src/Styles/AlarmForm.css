@@ -1,0 +1,49 @@
+#Cancel-Button {
+  position: fixed;
+  top: 5%;
+  left: 2%;
+}
+
+#Form-Page-Container {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  top: 0;
+}
+
+#Alarm-Form {
+  display: flex;
+  text-align: center;
+  margin-top: 10%;
+}
+
+.Vertical-Items {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  grid-row-gap: 1rem;
+}
+
+.Horizontal-Items {
+  display: flex;
+  justify-content: center;
+  grid-gap: 1rem;
+}
+
+
+#Alarm-Label {
+  margin-left: 2%;
+}
+
+.Label-Font {
+  font-size: 1.5rem
+}
+
+.Option-Boxes {
+  height: 2rem;
+}
+
+#Submit-Button {
+  width: fit-content;
+  align-self: center;
+}

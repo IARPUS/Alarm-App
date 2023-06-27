@@ -1,4 +1,23 @@
 #Cards-Container {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10%;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+#Add-Alarm-Button {
+  position: fixed;
+  top: 5%;
+  right: 2%;
+  margin: 2%;
+}
+
+#Edit-Button {
+  position: fixed;
+  top: 5%;
+  left: 2%;
+  margin: 2%;
 }
