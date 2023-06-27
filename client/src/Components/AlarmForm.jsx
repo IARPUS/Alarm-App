@@ -126,9 +126,13 @@ const AlarmForm = ({ list, setAlarmList, setAlarmFormIsVisible }) => {
           <div className="Horizontal-Items Label-Font">
             {daysCheckBoxes}
           </div>
-          <label htmlFor="Alarm-Label" className="Label-Font">
+          <label htmlFor="Sound-Duration-Label" className="Label-Font Horizontal-Items">
+            Sound Duration (Seconds)
+            <input id="Sound-Duration-Label" type="number" name="label" defaultValue="10" required className="Input-Boxes"></input>
+          </label>
+          <label htmlFor="Alarm-Label" className="Label-Font Horizontal-Items">
             Label
-            <input id="Alarm-Label" type="text" name="label" required></input>
+            <input id="Alarm-Label" type="text" name="label" defaultValue="My Alarm" required className="Input-Boxes"></input>
           </label>
           <button type="submit" id="Submit-Button"> Save </button>
         </form >

@@ -43,6 +43,10 @@
   height: 2rem;
 }
 
+.Input-Boxes {
+  height: 1.5rem;
+}
+
 #Submit-Button {
   width: fit-content;
   align-self: center;
