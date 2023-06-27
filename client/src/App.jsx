@@ -91,7 +91,7 @@ function App() {
             <>
               <button id="Edit-Button" onClick={() => { setIsEditButtonsVisible(!isEditButtonsVisible); }}>Edit</button>
               <button id="Add-Alarm-Button" onClick={() => { setAlarmFormIsVisible(!alarmFormIsVisible); setIsEditButtonsVisible(false) }}>+</button >
-              < div id="Alarm-Cards-Container">{alarmCards}</div >
+              <div id="Cards-Container">{alarmCards}</div>
             </>
           )}
     </>

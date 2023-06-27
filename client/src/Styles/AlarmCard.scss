@@ -1,0 +1,136 @@
+$grid-columns-unshifted: 40% 40% 20%;
+$grid-rows: 50% 50%;
+
+#Alarm-Card-Container {
+  position: relative;
+  border-style: solid;
+  border-color: gray;
+  border-width: .4rem;
+  background-color: black;
+  border-radius: 8%;
+  display: grid;
+  grid-template-columns: $grid-columns-unshifted;
+  grid-template-rows: $grid-rows;
+  margin-top: 2%;
+  margin-right: 2%;
+  height: 8rem;
+  width: 17rem;
+}
+
+#Time {
+  position: absolute;
+  font-size: 3rem;
+  grid-column-start: 1;
+  grid-column-end: 2;
+  grid-row-start: 1;
+  grid-row-end: 2;
+  margin: 5%;
+  transition: transform 0.5s ease;
+}
+
+
+#Time-Abbreviation {
+  position: absolute;
+  font-size: 2rem;
+  grid-column-start: 2;
+  grid-column-end: 3;
+  grid-row-start: 1;
+  grid-row-end: 2;
+  margin-top: 12%;
+  transition: transform 0.5s ease;
+}
+
+
+#Title {
+  position: absolute;
+  width: fit-content;
+  font-size: 1rem;
+  margin-left: 5%;
+  grid-column-start: 1;
+  grid-column-end: 3;
+  grid-row-start: 2;
+  grid-row-end: 3;
+  overflow-wrap: break-word;
+  transition: transform 0.5s ease;
+}
+
+#Alarm-Card-Delete-Button {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: fit-content;
+  border: none;
+  grid-column-start: 1;
+  grid-column-end: 2;
+  grid-row-start: 1;
+  grid-row-end: 3;
+  margin-left: -19%;
+  margin-top: 40%;
+  background-color: transparent;
+  transition: transform .5s ease;
+  display: none;
+}
+
+#Delete-Button-Icon {}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 45px;
+  height: 24px;
+  margin-left: 0;
+  grid-column-start: 3;
+  grid-column-end: 4;
+  grid-row-start: 1;
+  grid-row-end: 3;
+  margin-top: 100%;
+  transition: transform 0.5s ease;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked+.slider {
+  background-color: #2196F3;
+}
+
+input:focus+.slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked+.slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
