@@ -3,13 +3,12 @@ const Alarm = require('../models/alarm.js');
 const router = express.Router();
 const alarmSchedules = require('../../alarmSchedules.js');
 //essentially creating the API here
+
 //route for getting all alarms
 //we use async since we want to wait for the .find() but dont want to stall other code
 router.get('/', async (req, res) => {
   try {
-    //grab all alarms from database
     const alarms = await Alarm.find();
-    //parse json
     alarms.forEach(alarm => {
       alarmSchedules.addAlarmSchedule(alarm);
     });
@@ -20,11 +19,13 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: err.message })
   }
 });
+
 //route for getting specific alarm by id
 router.get('/:id', getAlarm, async (req, res) => {
   res.json(res.alarm);
-  console.log("Succuesfully retrieved alarm data");
+  console.log("Succesfully retrieved alarm data");
 });
+
 //route for updating one
 router.patch('/:id', getAlarm, async (req, res) => {
   //bunch of if statements to check what data is changed, and if it is changed replace the old with the new data
@@ -40,11 +41,17 @@ router.patch('/:id', getAlarm, async (req, res) => {
   if (req.body.repeatDays != null) {
     res.alarm.repeatDays = req.body.repeatDays;
   }
+  if (req.body.soundDuration != null) {
+    res.alarm.soundDuration = req.body.soundDuration;
+  }
+  if (req.body.snooze != null) {
+    res.alarm.snooze = req.body.snooze;
+  }
   try {
     const updatedAlarm = await res.alarm.save();
-    updateAlarmSchedule(updatedAlarm);
+    alarmSchedules.updateAlarmSchedule(updatedAlarm);
     res.json(updatedAlarm);
-    console.log("Succuesfully updated alarm data");
+    console.log("Succesfully updated alarm data");
   }
   catch (err) {
     //send 400 status due to unaccepted request
@@ -52,6 +59,7 @@ router.patch('/:id', getAlarm, async (req, res) => {
   }
 
 });
+
 //route for creating one
 router.post('/', async (req, res) => {
   //create new Alarm object
@@ -61,7 +69,9 @@ router.post('/', async (req, res) => {
       name: req.body.name,
       time: req.body.time,
       abbreviation: req.body.abbreviation,
-      repeatDays: req.body.repeatDays
+      repeatDays: req.body.repeatDays,
+      soundDuration: req.body.soundDuration,
+      snooze: req.body.snooze
     }
   );
   try {
@@ -75,6 +85,7 @@ router.post('/', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+
 //route for deleting one
 router.delete('/:id', getAlarm, async (req, res) => {
   try {
@@ -88,7 +99,8 @@ router.delete('/:id', getAlarm, async (req, res) => {
     res.status(500).json({ message: err.message })
   }
 });
-//middleware for 
+
+//middleware for getting existing alarm data
 async function getAlarm(req, res, next) {
   let alarm
   try {

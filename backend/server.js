@@ -7,7 +7,7 @@ const app = express();
 
 const corsOptions = {
   origin: 'http://127.0.0.1:5173', // Replace with the actual client domain
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 mongoose.connect(DATABASE_URL, { useNewUrlParser: true }).then(() => {

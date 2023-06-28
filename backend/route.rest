@@ -4,11 +4,26 @@ Content-Type: application/json
 {
   "name": "test",
   "time": "12:30",
-  "abbreviation": "PM",
-  "repeatDays": ["Sunday", "Monday"]
+  "abbreviation": "AM",
+  "repeatDays": ["Sunday", "Monday"],
+  "soundDuration": "5",
+  "snooze" : "true"
 }
 ###
 GET http://localhost:3000/alarms
 
 ### 
-DELETE http://localhost:3000/alarms/6493790fe205c3c2aa81b265
+DELETE http://localhost:3000/alarms/649bac706678357b013358e4
+
+###
+PATCH http://localhost:3000/alarms/649bacb2275caf7b4f106be3
+Content-Type: application/json
+
+{
+  "name": "test2",
+  "time": "12:30",
+  "abbreviation": "PM",
+  "repeatDays": ["Sunday", "Monday"],
+  "soundDuration": "5",
+  "snooze" : "true"
+}

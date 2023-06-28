@@ -18,6 +18,14 @@ const alarmSchema = new mongoose.Schema({
   repeatDays: {
     type: Array,
     required: true
+  },
+  soundDuration: {
+    type: Number,
+    required: true
+  },
+  snooze: {
+    type: Boolean,
+    required: true
   }
 })
 

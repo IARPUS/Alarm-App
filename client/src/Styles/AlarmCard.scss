@@ -1,4 +1,4 @@
-$grid-columns-unshifted: 40% 40% 20%;
+$grid-columns-unshifted: 50% 30% 20%;
 $grid-rows: 50% 50%;
 
 #Alarm-Card-Container {
@@ -19,34 +19,41 @@ $grid-rows: 50% 50%;
 }
 
 #Time {
-  position: absolute;
+  display: inline-block;
   font-size: 3rem;
   grid-column-start: 1;
   grid-column-end: 2;
   grid-row-start: 1;
   grid-row-end: 2;
+  width: fit-content;
+  height: fit-content;
+  justify-content: center;
   margin: 5%;
+  margin-left: 7%;
   transition: transform 0.5s ease;
 }
 
 
 #Time-Abbreviation {
-  position: absolute;
+  display: inline-block;
   font-size: 2rem;
   grid-column-start: 2;
   grid-column-end: 3;
   grid-row-start: 1;
   grid-row-end: 2;
-  margin-top: 12%;
+  margin-top: 18%;
+  margin-left: 10%;
+  width: fit-content;
+  height: fit-content;
   transition: transform 0.5s ease;
 }
 
 
 #Title {
-  position: absolute;
+  display: inline-block;
   width: fit-content;
   font-size: 1rem;
-  margin-left: 5%;
+  margin-left: 8%;
   grid-column-start: 1;
   grid-column-end: 3;
   grid-row-start: 2;
@@ -72,6 +79,30 @@ $grid-rows: 50% 50%;
   background-color: transparent;
   transition: transform .5s ease;
   display: none;
+}
+
+#Alarm-Edit-Button {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: fit-content;
+  border: none;
+  grid-column-start: 3;
+  grid-column-end: 4;
+  grid-row-start: 1;
+  grid-row-end: 3;
+  right: -30%;
+  top: 36%;
+  background-color: transparent;
+  transition: transform .5s ease;
+}
+
+button:focus,
+button:active {
+  border: none;
+  outline: none !important;
 }
 
 .slider {

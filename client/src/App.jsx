@@ -6,7 +6,8 @@ import AlarmForm from './Components/AlarmForm'
 const DATABASE_URL = "http://localhost:3000/alarms";
 
 function App() {
-  const [alarmList, setAlarmList] = useState([]);
+  const [alarmIdToEdit, setAlarmIdToEdit] = useState("N/A");
+  const [alarmMap, setalarmMap] = useState(() => new Map);
   const [alarmCards, setAlarmCards] = useState([]);
   //state used to toggle between the alarm form and cards
   const [alarmFormIsVisible, setAlarmFormIsVisible] = useState(false);
@@ -14,11 +15,11 @@ function App() {
   const [isEditButtonsVisible, setIsEditButtonsVisible] = useState(false);
 
   //function to create the actual alarmcards from data
-  const createAlarmCardsHTML = (data) => {
+  const createAlarmCardsHTML = (alarmMap) => {
     let alarmCardsHTML = [];
-    for (let alarmData of data) {
-      alarmCardsHTML.push(<AlarmCard isEditButtonsVisible={isEditButtonsVisible} key={alarmData._id} id={alarmData._id} deleteAlarmCard={deleteAlarmCard} name={alarmData.name} time={alarmData.time} abbreviation={alarmData.abbreviation} repeatDays={alarmData.repeatDays} ></AlarmCard>);
-    }
+    alarmMap.forEach((val, key) => {
+      alarmCardsHTML.push(<AlarmCard setAlarmMap={setalarmMap} setAlarmFormIsVisible={setAlarmFormIsVisible} isEditButtonsVisible={isEditButtonsVisible} key={key} id={key.toString()} deleteAlarmCard={deleteAlarmCard} name={val.name} time={val.time} abbreviation={val.abbreviation} repeatDays={val.repeatDays} setAlarmIdToEdit={setAlarmIdToEdit}></AlarmCard>);
+    });
     return alarmCardsHTML;
   };
 
@@ -39,7 +40,11 @@ function App() {
         })
         .then(data => {
           console.log(data);
-          setAlarmList(data);
+          const newAlarmMap = new Map();
+          for (let alarm of data) {
+            newAlarmMap.set(alarm._id, alarm);
+          }
+          setalarmMap(newAlarmMap);
         })
         .catch(err => console.log("Error in fetching data", err))
     };
@@ -48,9 +53,9 @@ function App() {
 
   //update our alarm cards whenever the alarm list changes
   const updateAlarmCards = useCallback(() => {
-    const cards = createAlarmCardsHTML(alarmList);
+    const cards = createAlarmCardsHTML(alarmMap);
     setAlarmCards(cards);
-  }, [alarmList, isEditButtonsVisible]);
+  }, [alarmMap, isEditButtonsVisible]);
 
   useEffect(() => {
     updateAlarmCards();
@@ -64,17 +69,19 @@ function App() {
         {
           method: "DELETE"
         });
-      setAlarmList(alarmList.filter((alarm) => alarm._id != id));
       console.log("Succesful in connecting");
     }
     catch (error) {
       console.log("Error in fetching", error);
     }
+    const newMap = new Map(alarmMap);
+    newMap.delete(id);
+    setalarmMap(newMap);
   }
   //update visibility of alarm cards based on whether or not alarm form is visible
   return (
     <>
-      {alarmList.length == 0 && !alarmFormIsVisible ?
+      {alarmMap.length == 0 && !alarmFormIsVisible ?
         (
           <>
             <button id="Add-Alarm-Button" onClick={() => { setAlarmFormIsVisible(!alarmFormIsVisible); setIsEditButtonsVisible(false) }}>+</button >
@@ -84,7 +91,7 @@ function App() {
         :
         alarmFormIsVisible ?
           (
-            <AlarmForm list={alarmList} setAlarmFormIsVisible={setAlarmFormIsVisible} setAlarmList={setAlarmList}></AlarmForm>
+            <AlarmForm list={Array.from(alarmMap)} setAlarmFormIsVisible={setAlarmFormIsVisible} setalarmMap={setalarmMap} alarmId={alarmIdToEdit}></AlarmForm>
           )
           :
           (

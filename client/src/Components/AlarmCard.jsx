@@ -2,13 +2,14 @@ import { useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import '../Styles/AlarmCard.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
-const AlarmCard = ({ name, time, abbreviation, repeatDays, deleteAlarmCard, isEditButtonsVisible, id /*snooze, sound, handleEdit*/ }) => {
+import { faTrashCan, faChevronRight } from '@fortawesome/free-solid-svg-icons'
+const AlarmCard = ({ name, time, abbreviation, repeatDays, deleteAlarmCard, isEditButtonsVisible, setAlarmFormIsVisible, setAlarmIdToEdit, id }) => {
   const alarmCardContainer = useRef();
   const timeTitle = useRef();
   const timeAbbreviationTitle = useRef();
   const title = useRef();
   const deleteButton = useRef();
+  const editButton = useRef();
   //handle transitions each time the edit button is pressed using useEffect
   useEffect(() => {
     const translate = (isEditButtonsVisible) => {
@@ -16,6 +17,7 @@ const AlarmCard = ({ name, time, abbreviation, repeatDays, deleteAlarmCard, isEd
       const timeAbbreviationTitleElement = timeAbbreviationTitle.current;
       const titleElement = title.current;
       const deleteButtonElement = deleteButton.current;
+      const editButtonElement = editButton.current;
       if (isEditButtonsVisible) {
         deleteButtonElement.style.display = "block";
         const alarmCardContainerWidth = alarmCardContainer.current.offsetWidth;
@@ -27,6 +29,10 @@ const AlarmCard = ({ name, time, abbreviation, repeatDays, deleteAlarmCard, isEd
         deleteButtonElement.display = "inline";
         const deleteTranslation = translation / 2.25;
         deleteButtonElement.style.transform = `translateX(${deleteTranslation}px)`;
+        if (editButtonElement != null) {
+          const editButtonTranslation = deleteTranslation * -1;
+          editButtonElement.style.transform = `translateX(${editButtonTranslation}px)`
+        }
       }
       else {
         timeTitleElement.style.transform = `translateX(0px)`;
@@ -73,7 +79,7 @@ const AlarmCard = ({ name, time, abbreviation, repeatDays, deleteAlarmCard, isEd
       </>
       {isEditButtonsVisible ?
         (
-          null
+          <button id="Alarm-Edit-Button" ref={editButton} onClick={() => { setAlarmIdToEdit(id); setAlarmFormIsVisible(true); }}><FontAwesomeIcon icon={faChevronRight} /></button>
         ) : (
           <>
             <label className="switch">
@@ -93,6 +99,8 @@ AlarmCard.propTypes = {
   repeatDays: PropTypes.array,
   deleteAlarmCard: PropTypes.func,
   isEditButtonsVisible: PropTypes.bool,
-  id: PropTypes.string
+  id: PropTypes.string,
+  setAlarmFormIsVisible: PropTypes.func,
+  setAlarmIdToEdit: PropTypes.func
 };
 export default AlarmCard;

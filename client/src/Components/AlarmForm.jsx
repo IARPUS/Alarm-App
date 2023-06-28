@@ -24,25 +24,81 @@ const createHTMLElements = () => {
     }
   }
   for (let day of days) {
-    daysCheckBoxes.push(<label key={day + 2} htmlFor={day}> {day}<input key={day + 1} type="checkbox" id={day} value={1} ></input></label>);
+    daysCheckBoxes.push(<label key={day + 2} htmlFor={day}> {day}<input key={day + 1} className="Day-CheckBoxes" type="checkbox" id={day} value={1} ></input></label>);
   }
 };
 createHTMLElements();
 
-const AlarmForm = ({ list, setAlarmList, setAlarmFormIsVisible }) => {
+const AlarmForm = ({ list, setalarmMap, setAlarmFormIsVisible, alarmId = "N/A" }) => {
+  const listMap = new Map(list);
   //the data format that will be stored
-  const defaultData = {
-    name: "",
-    time: "",
-    abbreviation: "",
+  const dataFormat = {
+    name: "My Alarm",
+    time: "1:00",
+    abbreviation: "AM",
     repeatDays: [],
+    soundDuration: 15,
+    snooze: false,
     _id: ""
-  };
-  const [data, setData] = useState(defaultData);
-  //update data to database
 
+  };
+  const [checked, setChecked] = useState(false);
+  const [defaultData, setDefaultData] = useState(dataFormat);
+  //retrieve existing data from database if id is provided
   useEffect(() => {
-    const updateDB = async () => {
+    const setInitialData = async () => {
+      await fetch(DATABASE_URL + "/" + alarmId)
+        .then(res => {
+          if (res.ok) {
+            console.log("Successfully connected to fetch data");
+            const data = res.json();
+            return data;
+          }
+          else {
+            console.log("Failed status");
+            return null;
+          }
+        })
+        .then(data => {
+          let { name, time, abbreviation, repeatDays, soundDuration, snooze, _id } = data;
+          let prevData = { name, time, abbreviation, repeatDays, soundDuration, snooze, _id };
+          console.log(prevData);
+          setDefaultData(prevData);
+          setChecked(prevData.snooze);
+        })
+        .catch(err => console.log("Error in fetching data", err))
+    };
+    if (alarmId != "N/A" && listMap.length != 0) {
+      setInitialData();
+    }
+  }, []);
+
+  //submitting data to database and update alarmcards
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    let newName = e.target.elements["Alarm-Label"].value;
+    let newTime = e.target.elements["Hour"].value + ":" + e.target.elements["Minutes"].value;
+    let newAbbreviation = e.target.elements["Abbreviation"].value;
+    let newRepeatDays = [];
+    let daysHTML = e.target.getElementsByClassName("Day-CheckBoxes");
+    let newSoundDuration = e.target.elements["Sound-Duration"].value;
+    let newSnooze = e.target.elements["Snooze-Check-Box"].checked;
+    for (let checkbox of daysHTML) {
+      if (checkbox.checked) {
+        newRepeatDays.push(checkbox.id);
+      }
+    }
+    //update state
+    console.log(daysHTML);
+    const newData = {
+      name: newName,
+      time: newTime,
+      abbreviation: newAbbreviation,
+      repeatDays: newRepeatDays,
+      soundDuration: newSoundDuration,
+      snooze: newSnooze
+    };
+    const updateDB = async (data) => {
       try {
         const res = await fetch(DATABASE_URL, {
           method: "POST",
@@ -52,6 +108,7 @@ const AlarmForm = ({ list, setAlarmList, setAlarmFormIsVisible }) => {
           body: JSON.stringify(data)
         });
         const resData = await res.json();
+        console.log(resData);
         console.log("Succesfully sent data to database");
         return resData._id;
       }
@@ -59,47 +116,43 @@ const AlarmForm = ({ list, setAlarmList, setAlarmFormIsVisible }) => {
         console.log("Error saving data to database:", error);
       }
     };
-    const updateList = async () => {
-      if (JSON.stringify(data) !== JSON.stringify(defaultData)) {
-        console.log("Data posted", JSON.stringify(data));
-        const dataWithID = data;
-        dataWithID._id = await updateDB();
-        const newList = [...list, dataWithID];
-        setAlarmList(newList);
-        setAlarmFormIsVisible(false);
+    const updateExistingDataDB = async (id, data) => {
+      try {
+        const res = await fetch(DATABASE_URL + "/" + id, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+        const resData = await res.json();
+        console.log(resData);
+        console.log("Succesfully sent data to database");
+        return resData._id;
       }
-    }
-    updateList();
-    //reset form and state 
-  }, [data])
-
-
-  //submitting data to database 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    let newName = e.target.elements["label"].value;
-    let newTime = e.target.elements["Hour"].value + ":" + e.target.elements["Minutes"].value;
-    let newAbbreviation = e.target.elements["Abbreviation"].value;
-    let newRepeatDays = [];
-    let daysHTML = e.target.getElementsByClassName("Day-CheckBoxes");
-    for (let checkbox of daysHTML) {
-      if (checkbox.checked) {
-        newRepeatDays.push(checkbox.id);
+      catch (error) {
+        console.log("Error saving data to database:", error);
       }
+    };
+    const updateList = async (data) => {
+      console.log("Data posted", JSON.stringify(data));
+      const dataWithID = data;
+      const newList = new Map(listMap);
+      if (listMap.has(alarmId)) {
+        updateExistingDataDB(alarmId, data);
+        newList.set(alarmId, data);
+
+      }
+      else {
+        dataWithID._id = await updateDB(data);
+        newList.set(dataWithID._id, dataWithID);
+      }
+      setalarmMap(newList);
+      setAlarmFormIsVisible(false);
+
     }
-    //update state
-    setData({
-      name: newName,
-      time: newTime,
-      abbreviation: newAbbreviation,
-      repeatDays: newRepeatDays
-    });
+    updateList(newData);
   }
-  //function to reset data without trigger useEffect
-  const resetData = () => {
-    setData(defaultData);
-  };
-
   return (
     <>
       <div id="Form-Page-Container">
@@ -126,13 +179,17 @@ const AlarmForm = ({ list, setAlarmList, setAlarmFormIsVisible }) => {
           <div className="Horizontal-Items Label-Font">
             {daysCheckBoxes}
           </div>
-          <label htmlFor="Sound-Duration-Label" className="Label-Font Horizontal-Items">
+          <label htmlFor="Snooze-Check-Box" className="Label-Font">
+            Snooze
+            <input id="Snooze-Check-Box" type="checkbox" checked={checked} onChange={() => setChecked(!checked)}></input>
+          </label>
+          <label htmlFor="Sound-Duration" className="Label-Font Horizontal-Items">
             Sound Duration (Seconds)
-            <input id="Sound-Duration-Label" type="number" name="label" defaultValue="10" required className="Input-Boxes"></input>
+            <input id="Sound-Duration" type="number" name="label" defaultValue={defaultData.soundDuration} required className="Input-Boxes"></input>
           </label>
           <label htmlFor="Alarm-Label" className="Label-Font Horizontal-Items">
             Label
-            <input id="Alarm-Label" type="text" name="label" defaultValue="My Alarm" required className="Input-Boxes"></input>
+            <input id="Alarm-Label" type="text" name="label" defaultValue={defaultData.name} required className="Input-Boxes"></input>
           </label>
           <button type="submit" id="Submit-Button"> Save </button>
         </form >
@@ -142,8 +199,9 @@ const AlarmForm = ({ list, setAlarmList, setAlarmFormIsVisible }) => {
   )
 };
 AlarmForm.propTypes = {
-  list: PropTypes.arrayOf(PropTypes.object),
-  setAlarmList: PropTypes.func,
-  setAlarmFormIsVisible: PropTypes.func
+  list: PropTypes.array,
+  setalarmMap: PropTypes.func,
+  setAlarmFormIsVisible: PropTypes.func,
+  alarmId: PropTypes.string
 };
 export default AlarmForm;
