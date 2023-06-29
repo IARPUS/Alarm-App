@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const router = require('./database/routes/alarms.js');
 const cors = require('cors');
 const DATABASE_URL = "mongodb://localhost/alarms";
-const app = express();
 
+const app = express();
 const corsOptions = {
   origin: 'http://127.0.0.1:5173', // Replace with the actual client domain
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],

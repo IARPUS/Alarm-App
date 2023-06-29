@@ -2,23 +2,43 @@ import { useState, useEffect, useCallback } from 'react'
 import './Styles/App.css'
 import AlarmCard from './Components/AlarmCard'
 import AlarmForm from './Components/AlarmForm'
-
+import * as scheduler from './audioPlayer/alarmSchedules';
 const DATABASE_URL = "http://localhost:3000/alarms";
 
 function App() {
   const [alarmIdToEdit, setAlarmIdToEdit] = useState("N/A");
   const [alarmMap, setalarmMap] = useState(() => new Map);
+  const [scheduleMap, setScheduleMap] = useState(() => new Map);
   const [alarmCards, setAlarmCards] = useState([]);
   //state used to toggle between the alarm form and cards
   const [alarmFormIsVisible, setAlarmFormIsVisible] = useState(false);
   //state used to toggle delete and edit buttons
   const [isEditButtonsVisible, setIsEditButtonsVisible] = useState(false);
 
+  //function to create map of schedules based on alarm data, the maps need to be the same length at the end
+  const scheduleAllAlarms = () => {
+    //if there are no alarms
+    if (alarmMap.size != 0) {
+      const newScheduleMap = new Map();
+      alarmMap.forEach((val, key) => {
+        newScheduleMap.set(key, scheduler.createScheduleObject(val));
+      });
+      setScheduleMap(newScheduleMap);
+    }
+  }
+  const deleteSchedule = (id) => {
+    let newScheduleMap = new Map(scheduleMap);
+    const scheduleToDelete = newScheduleMap.get(id);
+    scheduler.toggleOffSchedule(scheduleToDelete);
+    newScheduleMap.delete(id);
+    setScheduleMap(newScheduleMap);
+  }
+
   //function to create the actual alarmcards from data
   const createAlarmCardsHTML = (alarmMap) => {
     let alarmCardsHTML = [];
     alarmMap.forEach((val, key) => {
-      alarmCardsHTML.push(<AlarmCard setAlarmMap={setalarmMap} setAlarmFormIsVisible={setAlarmFormIsVisible} isEditButtonsVisible={isEditButtonsVisible} key={key} id={key.toString()} deleteAlarmCard={deleteAlarmCard} name={val.name} time={val.time} abbreviation={val.abbreviation} repeatDays={val.repeatDays} setAlarmIdToEdit={setAlarmIdToEdit}></AlarmCard>);
+      alarmCardsHTML.push(<AlarmCard setScheduleMap={setScheduleMap} setAlarmMap={setalarmMap} setAlarmFormIsVisible={setAlarmFormIsVisible} isEditButtonsVisible={isEditButtonsVisible} key={key} id={key.toString()} deleteAlarmCard={deleteAlarmCard} name={val.name} time={val.time} abbreviation={val.abbreviation} repeatDays={val.repeatDays} setAlarmIdToEdit={setAlarmIdToEdit}></AlarmCard>);
     });
     return alarmCardsHTML;
   };
@@ -53,6 +73,9 @@ function App() {
 
   //update our alarm cards whenever the alarm list changes
   const updateAlarmCards = useCallback(() => {
+    if (scheduleMap.size === 0) {
+      scheduleAllAlarms();
+    }
     const cards = createAlarmCardsHTML(alarmMap);
     setAlarmCards(cards);
   }, [alarmMap, isEditButtonsVisible]);
@@ -77,11 +100,12 @@ function App() {
     const newMap = new Map(alarmMap);
     newMap.delete(id);
     setalarmMap(newMap);
+    deleteSchedule(id);
   }
   //update visibility of alarm cards based on whether or not alarm form is visible
   return (
     <>
-      {alarmMap.length == 0 && !alarmFormIsVisible ?
+      {alarmMap.size == 0 && !alarmFormIsVisible ?
         (
           <>
             <button id="Add-Alarm-Button" onClick={() => { setAlarmFormIsVisible(!alarmFormIsVisible); setIsEditButtonsVisible(false) }}>+</button >
@@ -91,7 +115,7 @@ function App() {
         :
         alarmFormIsVisible ?
           (
-            <AlarmForm list={Array.from(alarmMap)} setAlarmFormIsVisible={setAlarmFormIsVisible} setalarmMap={setalarmMap} alarmId={alarmIdToEdit}></AlarmForm>
+            <AlarmForm scheduleMap={Array.from(scheduleMap)} setScheduleMap={setScheduleMap} list={Array.from(alarmMap)} setAlarmFormIsVisible={setAlarmFormIsVisible} setalarmMap={setalarmMap} alarmId={alarmIdToEdit}></AlarmForm>
           )
           :
           (

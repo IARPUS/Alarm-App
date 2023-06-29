@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import '../Styles/AlarmForm.css'
+import * as scheduler from '../audioPlayer/alarmSchedules';
 
 const DATABASE_URL = "http://localhost:3000/alarms";
 
@@ -29,8 +30,9 @@ const createHTMLElements = () => {
 };
 createHTMLElements();
 
-const AlarmForm = ({ list, setalarmMap, setAlarmFormIsVisible, alarmId = "N/A" }) => {
+const AlarmForm = ({ list, setalarmMap, setAlarmFormIsVisible, scheduleMap, setScheduleMap, alarmId = "N/A" }) => {
   const listMap = new Map(list);
+  const schedules = new Map(scheduleMap);
   //the data format that will be stored
   const dataFormat = {
     name: "My Alarm",
@@ -88,8 +90,6 @@ const AlarmForm = ({ list, setalarmMap, setAlarmFormIsVisible, alarmId = "N/A" }
         newRepeatDays.push(checkbox.id);
       }
     }
-    //update state
-    console.log(daysHTML);
     const newData = {
       name: newName,
       time: newTime,
@@ -139,20 +139,23 @@ const AlarmForm = ({ list, setalarmMap, setAlarmFormIsVisible, alarmId = "N/A" }
       const dataWithID = data;
       const newList = new Map(listMap);
       if (listMap.has(alarmId)) {
-        updateExistingDataDB(alarmId, data);
-        newList.set(alarmId, data);
-
+        const dataId = await updateExistingDataDB(alarmId, data);
+        newList.set(dataId, data);
+        let scheduleToUpdate = schedules.get(dataId);
+        scheduler.updateAlarmSchedule(newList.get(dataId), scheduleToUpdate)
       }
       else {
         dataWithID._id = await updateDB(data);
         newList.set(dataWithID._id, dataWithID);
+        schedules.set(dataWithID._id, scheduler.createScheduleObject(dataWithID));
       }
       setalarmMap(newList);
       setAlarmFormIsVisible(false);
-
+      setScheduleMap(schedules);
     }
     updateList(newData);
   }
+
   return (
     <>
       <div id="Form-Page-Container">
@@ -202,6 +205,8 @@ AlarmForm.propTypes = {
   list: PropTypes.array,
   setalarmMap: PropTypes.func,
   setAlarmFormIsVisible: PropTypes.func,
-  alarmId: PropTypes.string
+  alarmId: PropTypes.string,
+  scheduleMap: PropTypes.array,
+  setScheduleMap: PropTypes.func
 };
 export default AlarmForm;
